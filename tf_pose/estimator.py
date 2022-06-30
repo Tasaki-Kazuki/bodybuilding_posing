@@ -1,6 +1,8 @@
 import logging
 import math
 
+from sympy import deg
+
 import slidingwindow as sw
 
 import cv2
@@ -393,6 +395,7 @@ class TfPoseEstimator:
             npimg = np.copy(npimg)
         image_h, image_w = npimg.shape[:2]
         centers = {}
+        y_coordinates = {}
         for human in humans:
             # draw point
             for i in range(common.CocoPart.Background.value):
@@ -401,8 +404,140 @@ class TfPoseEstimator:
 
                 body_part = human.body_parts[i]
                 center = (int(body_part.x * image_w + 0.5), int(body_part.y * image_h + 0.5))
+                y_coordinate = int(body_part.y * image_h + 0.5)
                 centers[i] = center
+                y_coordinates[i] = y_coordinate
+                #print(centers)        #追加
                 cv2.circle(npimg, center, 3, common.CocoColors[i], thickness=3, lineType=8, shift=0)
+
+
+
+
+            print(centers) 
+            print(y_coordinates)
+
+
+            h = np.array(centers[1])
+            sr = np.array(centers[2])
+            er = np.array(centers[3])
+
+            vec_h_sr = h-sr
+            vec_e_sr = er-sr
+
+            length_vec_h_sr = np.linalg.norm(vec_h_sr)
+            length_vec_e_sr = np.linalg.norm(vec_e_sr)
+            inner_product = np.inner(vec_h_sr, vec_e_sr)
+            cos_sr = inner_product / (length_vec_h_sr * length_vec_e_sr)
+
+            # 角度（ラジアン）の計算
+            rad_sr = np.arccos(cos_sr)
+
+            # 弧度法から度数法（rad ➔ 度）への変換
+            degree_sr = np.rad2deg(rad_sr)
+            if y_coordinates[1] > y_coordinates[3] and y_coordinates[2] > y_coordinates[3]:
+                print("右肘の上がり具合")
+                print(round(degree_sr))
+                if 173 -5 > degree_sr:
+                    print("右肘を"+str(round(173- degree_sr))+"度下げてください")
+                elif 173 +5 <degree_sr:
+                    print("右肘を"+str(round(degree_sr - 173))+"度上げてください")
+            elif  y_coordinates[1] < y_coordinates[3] and y_coordinates[2] < y_coordinates[3]:
+                degree_sr = 360 -degree_sr
+                print("右肘の上がり具合")
+                print(round(degree_sr))
+                if 173 -5 > degree_sr:
+                    print("右肘を"+str(round(173- degree_sr))+"度下げてください")
+                elif 173 +5 <degree_sr:
+                    print("右肘を"+str(round(degree_sr - 173))+"度あげてください")
+
+
+# -----------------------------------------------------------------------------------------
+# ０：鼻、１：心臓、２：右肩、3：右肘、４：右手首、５：左肩、６：左肘、７：左手首、８：右腰、９：右膝、10：右足首、11：左腰、
+# 12：左膝、13：左足首、14：右目、15：左目、16：右耳、17：左耳
+            h = np.array(centers[1])
+            s = np.array(centers[5])
+            e = np.array(centers[6])
+
+            vec_h = h-s
+            vec_e = e-s
+
+            length_vec_h = np.linalg.norm(vec_h)
+            length_vec_e = np.linalg.norm(vec_e)
+            inner_product = np.inner(vec_h, vec_e)
+            cos = inner_product / (length_vec_h * length_vec_e)
+
+            # 角度（ラジアン）の計算
+            rad = np.arccos(cos)
+
+            # 弧度法から度数法（rad ➔ 度）への変換
+            degree = np.rad2deg(rad)
+            if y_coordinates[1] > y_coordinates[6] and y_coordinates[5] > y_coordinates[6]:
+                print("左肘の上がり具合")
+                print(round(degree))
+                if 173 -5 > degree:
+                    print("左肘を"+str(round(173- degree))+"度下げてください")
+                elif 173 +5 <degree:
+                    print("左肘を"+str(round(degree - 173))+"度あげてください")
+            elif  y_coordinates[1] < y_coordinates[3] and y_coordinates[2] < y_coordinates[3]:
+                degree = 360 -degree
+                print("左肘の上がり具合")
+                print(round(degree))
+                if 173 -5 > degree:
+                    print("左肘を"+str(round(173- degree))+"度下げてください")
+                elif 173 +5 <degree:
+                    print("左肘を"+str(round(degree - 173))+"度上げてください")
+
+# -----------------------------------------------------------------------------------------
+
+            h = np.array(centers[4])
+            s = np.array(centers[3])
+            e = np.array(centers[2])
+
+            vec_h = h-s
+            vec_e = e-s
+
+            length_vec_h = np.linalg.norm(vec_h)
+            length_vec_e = np.linalg.norm(vec_e)
+            inner_product = np.inner(vec_h, vec_e)
+            cos = inner_product / (length_vec_h * length_vec_e)
+
+            # 角度（ラジアン）の計算
+            rad = np.arccos(cos)
+
+            # 弧度法から度数法（rad ➔ 度）への変換
+            degree = np.rad2deg(rad)
+            print("右肘の角度")
+            print(round(degree))
+            if 65 -5 > degree:
+                print("右肘を"+str(round(65- degree))+"度開いてください")
+            elif 65 +5 <degree:
+                print("右肘を"+str(round(degree - 65))+"閉じてください")            
+# -----------------------------------------------------------------------------------------
+
+            h = np.array(centers[5])
+            s = np.array(centers[6])
+            e = np.array(centers[7])
+
+            vec_h = h-s
+            vec_e = e-s
+
+            length_vec_h = np.linalg.norm(vec_h)
+            length_vec_e = np.linalg.norm(vec_e)
+            inner_product = np.inner(vec_h, vec_e)
+            cos = inner_product / (length_vec_h * length_vec_e)
+
+            # 角度（ラジアン）の計算
+            rad = np.arccos(cos)
+
+            # 弧度法から度数法（rad ➔ 度）への変換
+            degree = np.rad2deg(rad)
+            print("左肘の角度")
+            print(round(degree))
+            if 74 -5 > degree:
+                print("左肘を"+str(round(74- degree))+"度開いてください")
+            elif 74 +5 <degree:
+                print("左肘を"+str(round(degree - 74))+"度閉じてください")                 
+# -----------------------------------------------------------------------------------------
 
             # draw line
             for pair_order, pair in enumerate(common.CocoPairsRender):
