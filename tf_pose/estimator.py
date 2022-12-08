@@ -425,10 +425,10 @@ class TfPoseEstimator:
 
 
             # print(hoges) 
-            # with open('pri.csv', 'w') as file:
-            #     writer = csv.writer(file, lineterminator='\n')
-            #     writer.writerows(hoges)
-#             print(y_coordinates)
+            with open('output/pri.csv', 'w') as file:
+                writer = csv.writer(file, lineterminator='\n')
+                writer.writerows(hoges)
+            print(y_coordinates)
 
             # draw line
             for pair_order, pair in enumerate(common.CocoPairsRender):

@@ -1,4 +1,9 @@
 # Byte-compiled / optimized / DLL files
+images/
+
+*.jpg
+*.png
+
 __pycache__/
 *.py[cod]
 *$py.class
@@ -118,3 +123,5 @@ models/pretrained/resnet_v2_101/train.graph
 src/pafprocess/pafprocess.py
 src/pafprocess/pafprocess_wrap.cpp
 src/pafprocess/pafprocess_wrap.cxx
+
+
