@@ -575,6 +575,28 @@ class TfPoseEstimator:
         return humans
 
 
+def calculate_angle(point1,halfway_point,point2):
+  coordinate1 = np.array(point1)
+  coordinate2 = np.array(halfway_point)
+  coordinate3 = np.array(point2)
+
+  vec_1_2 = coordinate1-coordinate2
+  vec_3_2 = coordinate3-coordinate2
+
+  length_vec_1_2 = np.linalg.norm(vec_1_2)
+  length_vec_3_2 = np.linalg.norm(vec_3_2)
+  inner_product = np.inner(vec_1_2, vec_3_2)
+  cos_2 = inner_product / (length_vec_1_2 * length_vec_3_2)
+
+  # 角度（ラジアン）の計算
+  rad_2 = np.arccos(cos_2)
+
+  # 弧度法から度数法（rad ➔ 度）への変換
+  degree_2 = np.rad2deg(rad_2)
+  degree_2 = round(degree_2)
+  return degree_2
+
+
 if __name__ == '__main__':
     import pickle
 
