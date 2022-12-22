@@ -393,13 +393,20 @@ class TfPoseEstimator:
 
     @staticmethod
     def draw_humans(npimg, humans, imgcopy=False):
-        df = pd.read_csv('hoges.csv')
-        print(df.values.tolist())
+        df = pd.read_csv('output/aizawa_dbs.csv')
+        aizawa_points= df.values.tolist()
+        aizawajoint_angles = {}
+        aizawajoint_angles['R_shoulder'] = calculate_angle(aizawa_points[1],aizawa_points[2],aizawa_points[3])
+        aizawajoint_angles['L_shoulder'] = calculate_angle(aizawa_points[1],aizawa_points[5],aizawa_points[6])
+        aizawajoint_angles['R_elbow'] = calculate_angle(aizawa_points[2],aizawa_points[3],aizawa_points[4])
+        aizawajoint_angles['L_elbow'] = calculate_angle(aizawa_points[5],aizawa_points[6],aizawa_points[7])
         if imgcopy:
             npimg = np.copy(npimg)
         image_h, image_w = npimg.shape[:2]
         centers = {}
-        hoges =[[]] * 18
+        hoges =[[0,0]] * 19
+        hoges[0] =["x","y"]
+        is_angle_matched =[False]*4
         # print(hoges)
         y_coordinates = {}
         for human in humans:
@@ -415,28 +422,53 @@ class TfPoseEstimator:
                 # print(center)
                 centers[i] = center
                 # print(i)
-                hoges[i] = hoge
+                hoges[i+1] = hoge
                 y_coordinates[i] = y_coordinate
-            print(hoges)  
-            print(centers)      #追加
+            # print(hoges)   #追加
 #                 cv2.circle(npimg, center, 3, common.CocoColors[i], thickness=3, lineType=8, shift=0)
+            # print(y_coordinates)
+            now_joint_angles = {}
+            try:
+                now_joint_angles['R_shoulder'] = calculate_angle(centers[1],centers[2],centers[3]) if centers[2][1] > centers[3][1] else 360 - calculate_angle(centers[1],centers[2],centers[3])
+                is_angle_matched[0] = True if (now_joint_angles['R_shoulder'] > aizawajoint_angles['R_shoulder']-10 and now_joint_angles['R_shoulder'] < aizawajoint_angles['R_shoulder']+10) else False
+            except:
+                pass
+            try:
+                now_joint_angles['L_shoulder'] = calculate_angle(centers[1],centers[5],centers[6]) if centers[5][1] > centers[6][1] else 360 - calculate_angle(centers[1],centers[5],centers[6])
+                is_angle_matched[1] = True if (now_joint_angles['L_shoulder'] > aizawajoint_angles['L_shoulder']-10 and now_joint_angles['L_shoulder'] < aizawajoint_angles['L_shoulder']+10) else False
+            except:
+                pass          
+            try:
+                now_joint_angles['R_elbow'] = calculate_angle(centers[2],centers[3],centers[4])
+                is_angle_matched[2] = True if (now_joint_angles['R_elbow'] > aizawajoint_angles['R_elbow']-10 and now_joint_angles['R_elbow'] < aizawajoint_angles['R_elbow']+10) else False
+            except:
+                pass
+            try:
+                now_joint_angles['L_elbow'] = calculate_angle(centers[5],centers[6],centers[7])
+                is_angle_matched[3] = True if (now_joint_angles['L_elbow'] > aizawajoint_angles['L_elbow']-10 and now_joint_angles['L_elbow'] < aizawajoint_angles['L_elbow']+10) else False
+            except:
+                pass
+            # else:
+            #     return
 
-
-
-
-            # print(hoges) 
-            with open('output/pri.csv', 'w') as file:
-                writer = csv.writer(file, lineterminator='\n')
-                writer.writerows(hoges)
-            print(y_coordinates)
-
+            # CSVへの書き出し
+            # with open('output/hogehoge.csv', 'w') as file:
+            #     writer = csv.writer(file, lineterminator='\n')
+            #     writer.writerows(hoges)
+            print(centers)
+            print(now_joint_angles)
+            print(aizawajoint_angles)
+            print(is_angle_matched)
             # draw line
             for pair_order, pair in enumerate(common.CocoPairsRender):
                 if pair[0] not in human.body_parts.keys() or pair[1] not in human.body_parts.keys():
                     continue
 
-                # npimg = cv2.line(npimg, centers[pair[0]], centers[pair[1]], common.CocoColors[pair_order], 3)
-                cv2.line(npimg, centers[pair[0]], centers[pair[1]], common.CocoColors[pair_order], 3)
+                if ((not is_angle_matched[0]) and pair_order == 2) or ((not is_angle_matched[1]) and pair_order ==4)or ((not is_angle_matched[2]) and pair_order ==3)or ((not is_angle_matched[3]) and pair_order ==5):
+                # npimg = cv2.line(npimg, centers[pair[0]], centers[pair[1]], common.CocoColorspair_order], 3)
+                    npimg = cv2.line(npimg, centers[pair[0]], centers[pair[1]], common.CocoColors[12], 6)
+                else:
+                    npimg = cv2.line(npimg, centers[pair[0]], centers[pair[1]], common.CocoColors[6], 6)
 
         return npimg
 
